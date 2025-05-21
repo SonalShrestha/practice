@@ -45,9 +45,9 @@ jobs:
       - name: Check/create client catalog (if missing)
         run: |
           databricks version
-          if ! databricks catalog get --name "${{ github.event.inputs.client_name }}" &> /dev/null; then
+          if ! databricks catalogs create --name "${{ github.event.inputs.client_name }}" &> /dev/null; then
             echo "Catalog doesn’t exist. → creating…"
-            databricks catalog create --name "${{ github.event.inputs.client_name }}"
+            databricks catalogs create --name "${{ github.event.inputs.client_name }}"
           else
             echo "Catalog already exists."
           fi
