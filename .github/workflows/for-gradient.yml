@@ -41,13 +41,11 @@ jobs:
         run: pip install databricks-bundle
 
       - name: Configure Databricks CLI
+        run: echo -e "$DATABRICKS_HOST\n$DATABRICKS_TOKEN" | databricks configure --token
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-        run: |
-          echo -e "$DATABRICKS_HOST\n$DATABRICKS_TOKEN" \
-            | databricks configure --token
-
+        
       - name: Check/create client catalog
         run: |
           if ! databricks unity-catalog get-catalog \
