@@ -1,0 +1,36 @@
+# This is a Databricks asset bundle definition for clientparameter_gradient_dab.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: clientparameter_gradient_dab
+  uuid: aa81b011-3d6d-42e2-bd03-9aba1520edfa
+
+variables:
+  client_name:
+    description: Name of the Client to deploy
+  deploy_prefix:
+    description: Prefix for all resources names
+
+include:
+  - resources/*.jobs.yaml
+
+sync:
+  include:
+    - notebooks/**
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-56f60291-144c.cloud.databricks.com
+      root_path: /Workspace/Users/sonal.shrestha@sunnydata.ai/.bundle/${bundle.name}
+
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-56f60291-144c.cloud.databricks.com
+      # We explicitly deploy to /Workspace/Users/sonal.shrestha@sunnydata.ai to make sure we only have a single copy.
+      root_path: /Workspace/Users/sonal.shrestha@sunnydata.ai/.bundle/${bundle.name}/${bundle.target}
+    permissions:
+      - user_name: sonal.shrestha@sunnydata.ai
+        level: CAN_MANAGE
