@@ -20,6 +20,11 @@ jobs:
   deploy-bundles:
     runs-on: ubuntu-latest
 
+    # make DATABRICKS_HOST and DATABRICKS_TOKEN available to every step
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,45 +34,35 @@ jobs:
         with:
           python-version: '3.9'
 
-      #- name: Cache pip dependencies
-      #  uses: actions/cache@v3
-      #  with:
-      #    path: ~/.cache/pip
-      #    key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-      #    restore-keys: |
-      #      ${{ runner.os }}-pip-
-          
+      # Install the Databricks CLI v1 installer script
       - name: Install Databricks CLI v1
         run: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | bash
           echo "$HOME/.databricks/bin" >> $GITHUB_PATH
-      
+
       - name: Check/create client catalog (if missing)
         run: |
           databricks version
-          if ! databricks catalogs get --name "${{ github.event.inputs.client_name }}" &> /dev/null; then
+
+          # store the catalog name in a variable for readability
+          CATALOG="${{ github.event.inputs.client_name }}"
+
+          # check existence (positional arg), create if absent
+          if ! databricks catalogs get "$CATALOG" &> /dev/null; then
             echo "Catalog doesn’t exist. → creating…"
-            databricks catalogs create --name "${{ github.event.inputs.client_name }}"
+            databricks catalogs create "$CATALOG"
           else
             echo "Catalog already exists."
           fi
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
       - name: Deploy and Execute Bundle
         run: |
+          # deploy your bundle using the provided inputs
           databricks bundle deploy --target dev \
             --var client_name="${{ github.event.inputs.client_name }}" \
             --var deploy_prefix="${{ github.event.inputs.deploy_prefix }}"
-            
+
+          # then run it
           databricks bundle run --target dev \
             --var client_name="${{ github.event.inputs.client_name }}" \
             --var deploy_prefix="${{ github.event.inputs.deploy_prefix }}"
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-
-
-  #---------------------------------------------------------------------------------------------------------------
-  
