@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - dev_client_parameter_dabs
+      - main
     paths:
       - 'notebooks/**'
       - 'bundles/**'
