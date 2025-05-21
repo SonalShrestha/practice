@@ -37,15 +37,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install Databricks Asset Bundles CLI
-        run: pip install databricks-bundle
+      - name: Install Databricks CLI
+        run: pip install databricks
 
-      - name: Export Databricks auth environment variables
-        run: echo "Databricks auth set from env vars"
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-        
+      - name: Verify Databricks CLI install
+        run: which databricks
+          
       - name: Check/create client catalog
         run: |
           if ! databricks unity-catalog get-catalog \
@@ -57,6 +54,9 @@ jobs:
           else
             echo "Catalog already exists."
           fi
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
       - name: Deploy and Execute Bundle
         run: |
@@ -66,6 +66,9 @@ jobs:
           databricks bundle run --target dev \
             --var client_name="${{ github.event.inputs.client_name }}" \
             --var deploy_prefix="${{ github.event.inputs.deploy_prefix }}"
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
 
   #---------------------------------------------------------------------------------------------------------------
