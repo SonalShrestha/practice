@@ -29,17 +29,22 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      #- name: Cache pip dependencies
+      #  uses: actions/cache@v3
+      #  with:
+      #    path: ~/.cache/pip
+      #    key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      #    restore-keys: |
+      #      ${{ runner.os }}-pip-
           
-      - name: Install CLI & Check/create client catalog (if missing)
+      - name: Install Databricks CLI v1
         run: |
-          pip install databricks
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | bash
+          echo "$HOME/.databricks/bin" >> $GITHUB_PATH
+      
+      - name: Check/create client catalog (if missing)
+        run: |
+          databricks version
           if ! databricks unity-catalog get-catalog \
                --name "${{ github.event.inputs.client_name }}" \
                &> /dev/null; then
@@ -55,10 +60,10 @@ jobs:
 
       - name: Deploy and Execute Bundle
         run: |
-          pip install databricks
           databricks bundle deploy --target dev \
             --var client_name="${{ github.event.inputs.client_name }}" \
             --var deploy_prefix="${{ github.event.inputs.deploy_prefix }}"
+            
           databricks bundle run --target dev \
             --var client_name="${{ github.event.inputs.client_name }}" \
             --var deploy_prefix="${{ github.event.inputs.deploy_prefix }}"
