@@ -47,7 +47,7 @@ jobs:
           databricks version
           if ! databricks catalog get --name "${{ github.event.inputs.client_name }}" &> /dev/null; then
             echo "Catalog doesn’t exist. → creating…"
-            databricks create-catalog --name "${{ github.event.inputs.client_name }}"
+            databricks catalog create --name "${{ github.event.inputs.client_name }}"
           else
             echo "Catalog already exists."
           fi
