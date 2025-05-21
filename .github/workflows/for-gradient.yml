@@ -36,15 +36,10 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
-      - name: Install Databricks CLI
-        run: pip install databricks
-
-      - name: Verify Databricks CLI install
-        run: which databricks
           
-      - name: Check/create client catalog
+      - name: Install CLI & Check/create client catalog (if missing)
         run: |
+          pip install databricks
           if ! databricks unity-catalog get-catalog \
                --name "${{ github.event.inputs.client_name }}" \
                &> /dev/null; then
@@ -60,6 +55,7 @@ jobs:
 
       - name: Deploy and Execute Bundle
         run: |
+          pip install databricks
           databricks bundle deploy --target dev \
             --var client_name="${{ github.event.inputs.client_name }}" \
             --var deploy_prefix="${{ github.event.inputs.deploy_prefix }}"
