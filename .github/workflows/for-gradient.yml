@@ -40,8 +40,8 @@ jobs:
       - name: Install Databricks Asset Bundles CLI
         run: pip install databricks-bundle
 
-      - name: Configure Databricks CLI
-        run: echo -e "$DATABRICKS_HOST\n$DATABRICKS_TOKEN" | databricks configure --token
+      - name: Export Databricks auth environment variables
+        run: echo "Databricks auth set from env vars"
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
