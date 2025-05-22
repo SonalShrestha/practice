@@ -1,3 +1,5 @@
+name: Deploy Databricks Asset Bundle
+
 on:
   push:
     branches:
@@ -20,7 +22,7 @@ jobs:
   deploy-bundles:
     runs-on: ubuntu-latest
 
-    # make DATABRICKS_HOST and DATABRICKS_TOKEN available to every step
+    # making DATABRICKS_HOST and DATABRICKS_TOKEN available to every step
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
@@ -34,7 +36,7 @@ jobs:
         with:
           python-version: '3.9'
 
-      # Install the Databricks CLI v1 installer script
+      # Installing the Databricks CLI v1 installer script
       - name: Install Databricks CLI v1
         run: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | bash
@@ -44,10 +46,10 @@ jobs:
         run: |
           databricks version
 
-          # store the catalog name in a variable for readability
+          # Storing the catalog name in a variable for readability
           CATALOG="${{ github.event.inputs.client_name }}"
 
-          # check existence (positional arg), create if absent
+          # Checking existence (positional arg), creating if absent
           if ! databricks catalogs get "$CATALOG" &> /dev/null; then
             echo "Catalog doesn’t exist. → creating…"
             databricks catalogs create "$CATALOG"
@@ -57,12 +59,13 @@ jobs:
 
       - name: Deploy and Execute Bundle
         run: |
-          # deploy your bundle using the provided inputs
+          # Deploying bundle using the provided inputs
           databricks bundle deploy --target dev \
             --var client_name="${{ github.event.inputs.client_name }}" \
             --var deploy_prefix="${{ github.event.inputs.deploy_prefix }}"
 
-          # then run it
+          # then running it
           databricks bundle run --target dev \
+            clientparameter_gradient_dab_job \
             --var client_name="${{ github.event.inputs.client_name }}" \
             --var deploy_prefix="${{ github.event.inputs.deploy_prefix }}"
