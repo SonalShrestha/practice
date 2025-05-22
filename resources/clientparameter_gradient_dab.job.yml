@@ -13,14 +13,14 @@ resources:
             base_parameters:
               client_name: "{{ client_name }}"
               deploy_prefix: "{{ deploy_prefix }}"
-          job_cluster_key: shared_cluster
+          job_cluster_key: job_cluster
 
         - task_key: execute_notebooks
           depends_on:
             - task_key: list_notebooks
           for_each_task:
             inputs: "{{tasks.list_notebooks.values.notebook_paths}}"
-            concurrency: 5
+            concurrency: 3
             task:
               task_key: run_notebook
               notebook_task:
@@ -30,7 +30,7 @@ resources:
                   notebook_path: "{{input}}"
                   client_name: "{{ client_name }}"
                   deploy_prefix: "{{ deploy_prefix }}"
-              job_cluster_key: shared_cluster
+              job_cluster_key: job_cluster
 
       job_clusters:
         - job_cluster_key: job_cluster
